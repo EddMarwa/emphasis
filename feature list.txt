@@ -1,0 +1,280 @@
+QUANTUM CAPITAL - COMPLETE FEATURE LIST
+
+PHASE 1: CORE FEATURES (BUILD FIRST)
+1. User Management
+•	User registration (email/phone)
+•	User login/logout
+•	User profile management
+•	Unique User ID generation and assignment
+•	Account status management (active/suspended/pending)
+•	User dashboard
+2. Authentication & Security
+•	JWT token-based authentication
+•	Password hashing (bcrypt/argon2)
+•	Session management
+•	Two-factor authentication (2FA) preparation
+•	Secure API endpoints
+3. Investment Management
+•	Deposit funds (M-Pesa, Crypto)
+•	Withdraw funds
+•	View current balance
+•	Investment allocation tracking
+•	Minimum deposit rules
+•	Withdrawal limits and rules
+4. Transaction System
+•	Complete transaction history
+•	Transaction status tracking (pending/completed/failed)
+•	Transaction receipts
+•	Search and filter transactions
+•	Export transaction history (CSV/PDF)
+5. Portfolio Dashboard
+•	Total balance display
+•	Total profit/loss
+•	Portfolio performance chart
+•	Fund allocation visualization
+•	Daily/weekly/monthly returns
+•	Performance metrics
+6. Bot Integration
+•	Connect Deriv bot to platform
+•	Real-time bot status (active/inactive)
+•	Bot performance tracking
+•	Trade execution logging
+•	Profit distribution calculation
+•	Bot control (start/stop) - Admin only
+7. Admin Panel - Basic
+•	Admin login (separate from users)
+•	User overview list
+•	Total registered users count
+•	Total funds pooled (Assets Under Management)
+•	Platform statistics dashboard
+•	User account management (suspend/activate)
+•	Manual transaction adjustments (with audit trail)
+8. Payment Integration
+•	M-Pesa Daraja API integration
+•	STK Push for deposits
+•	B2C for withdrawals
+•	Crypto payment gateway (USDT TRC20/ERC20, Bitcoin)
+•	Wallet address generation
+•	Payment verification system
+•	Exchange rate conversion (Crypto to KES)
+9. Reporting & Analytics
+•	Daily performance reports
+•	User profit statements
+•	Platform fee calculations (10% of profits)
+•	Fee breakdown display
+•	Monthly summaries
+________________________________________
+PHASE 2: ENHANCEMENT FEATURES (ADD-ONS)
+10. Live Chat Support System
+•	Real-time chat widget
+•	Chat between users and support team
+•	Multiple support agents
+•	Chat history storage
+•	Typing indicators
+•	Online/offline status
+•	Unread message notifications
+•	Chat assignment to agents
+•	Canned responses for common queries
+11. Password Reset & Verification
+•	Forgot password functionality
+•	Email verification codes
+•	SMS verification codes (phone)
+•	Secure reset link generation
+•	Code expiration (time-limited)
+•	Email verification on registration
+•	Phone number verification
+•	Re-send verification code option
+12. Training Materials Section
+•	Video upload and management (admin)
+•	Video categories/playlists
+•	Documentation library
+•	PDF guide uploads
+•	Tutorial articles
+•	Search functionality
+•	Progress tracking (videos watched)
+•	Bookmarking favorite materials
+•	Download materials option
+•	Video player with controls
+13. Enhanced Admin Dashboard
+•	Total registered users (real-time)
+•	Active vs inactive users
+•	Total funds deposited
+•	Total funds withdrawn
+•	Current AUM (Assets Under Management)
+•	Total profits generated
+•	Platform revenue tracking
+•	User activity logs
+•	Login history tracking
+•	Failed login attempts monitoring
+•	Detailed user analytics
+•	Export reports (Excel/PDF)
+14. Referral Program
+•	Unique referral code per user
+•	Referral link generation
+•	Track referred users
+•	Referral bonus structure 
+o	Referee bonus (new user reward)
+o	Referrer bonus (existing user reward)
+•	Multi-tier referral system option
+•	Bonus calculation engine
+•	Automatic bonus distribution
+•	Referral analytics dashboard
+•	Visual referral tree/network
+•	Referral performance metrics
+•	Earned vs pending referral bonuses
+•	Referral history log
+15. Referral Leaderboard
+•	Top referrers ranking (by User ID)
+•	Weekly/Monthly/All-time leaderboards
+•	Points system for referrals
+•	Display total referrals count
+•	Display total bonus earned
+•	Prize/reward system for top referrers
+•	Public leaderboard (User IDs only, no names)
+•	Personal ranking position
+16. Suggestion Box / Feedback System
+•	User feedback submission form
+•	Category selection (bug/feature/improvement)
+•	Anonymous submission option
+•	Attachment support (screenshots)
+•	Feedback status tracking 
+o	Pending review
+o	Under consideration
+o	Accepted/Planned
+o	Implemented
+o	Rejected
+•	Admin review panel
+•	Response to user feedback
+•	Voting system (upvote suggestions)
+•	Public suggestion board
+17. User ID System (Privacy-Focused)
+•	Unique User ID format (e.g., QC-000001)
+•	Sequential or custom ID generation
+•	Use User IDs in all public displays
+•	Leaderboards show User IDs only
+•	Rankings by User ID
+•	Optional profile display name
+•	Hide real names for privacy
+•	User ID search functionality (admin)
+18. Notifications System
+•	Email notifications 
+o	Deposit confirmation
+o	Withdrawal confirmation
+o	Profit updates
+o	Referral bonuses
+o	Security alerts
+•	SMS notifications (optional)
+•	In-app notifications
+•	Notification preferences (user settings)
+•	Notification history
+19. KYC (Know Your Customer)
+•	ID upload (National ID, Passport)
+•	Selfie verification
+•	Address proof upload
+•	KYC status (unverified/pending/verified/rejected)
+•	Admin KYC review panel
+•	Automated verification (future AI integration)
+•	Withdrawal limits based on KYC status
+20. Security Features
+•	Login history
+•	Device tracking
+•	IP address logging
+•	Unusual activity alerts
+•	Account freeze option
+•	Email/SMS security alerts
+•	Password strength requirements
+•	Logout from all devices option
+________________________________________
+PHASE 3: ADVANCED FEATURES (FUTURE)
+21. Mobile App
+•	iOS app
+•	Android app
+•	Push notifications
+•	Biometric authentication
+22. Advanced Analytics
+•	Predictive analytics
+•	Risk assessment tools
+•	Portfolio optimization suggestions
+•	Market trend analysis
+23. Social Features
+•	User forums/community
+•	Success stories section
+•	Trading tips sharing
+24. Automated Reports
+•	Scheduled email reports
+•	Custom report builder
+•	Performance comparisons
+25. Multi-language Support
+•	English
+•	Swahili
+•	Other African languages
+26. Advanced Bot Features
+•	Multiple bot strategies
+•	User-selectable risk levels
+•	Custom bot parameters (advanced users)
+•	Backtesting results display
+27. Gamification
+•	Achievement badges
+•	Milestone rewards
+•	Progress levels
+•	Challenge system
+28. API for Third-Party Integration
+•	Public API for partners
+•	Webhook support
+•	API documentation
+________________________________________
+FEATURE PRIORITY MATRIX
+Must Have (Phase 1) - Months 1-6:
+•	Features 1-9 (Core Platform)
+Should Have (Phase 2) - Months 7-18:
+•	Features 10-20 (Enhancements)
+Nice to Have (Phase 3) - Months 19-24:
+•	Features 21-28 (Advanced)
+________________________________________
+DATABASE TABLES NEEDED
+Based on all features, here are the required tables:
+1.	users - User accounts and profiles
+2.	user_ids - Unique User ID mapping
+3.	investments - User investment records
+4.	transactions - All financial transactions
+5.	bot_trades - Individual bot trades
+6.	bot_performance - Daily bot performance
+7.	deposits - Deposit records
+8.	withdrawals - Withdrawal records
+9.	referrals - Referral tracking
+10.	referral_bonuses - Bonus distribution
+11.	chat_conversations - Chat sessions
+12.	chat_messages - Individual messages
+13.	training_videos - Video content
+14.	training_documents - PDF/document content
+15.	suggestions - User feedback
+16.	notifications - Notification queue
+17.	kyc_documents - KYC submissions
+18.	admin_users - Admin accounts
+19.	admin_actions - Audit log
+20.	platform_settings - Configuration
+21.	leaderboards - Ranking data
+22.	security_logs - Security events
+________________________________________
+TECH STACK RECOMMENDATION
+Backend:
+•	Node.js + Express OR Python + FastAPI
+•	PostgreSQL (confirmed)
+•	Redis (for caching and sessions)
+Frontend:
+•	React (confirmed)
+•	Tailwind CSS (confirmed)
+Payment APIs:
+•	M-Pesa Daraja API
+•	Crypto: Coinbase Commerce / NOWPayments
+Communication:
+•	Socket.io (live chat)
+•	Twilio (SMS)
+•	SendGrid/Mailgun (Email)
+File Storage:
+•	AWS S3 or Cloudinary (videos/documents)
+Deployment:
+•	Backend: Railway / Render / DigitalOcean
+•	Frontend: Vercel / Netlify
+•	Database: Supabase / Railway
+
