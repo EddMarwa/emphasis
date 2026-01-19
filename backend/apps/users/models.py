@@ -1,38 +1,127 @@
-from django.db import models\nfrom django.contrib.auth.hashers import make_password, check_password\nimport random\nimport string\n\nclass User(models.Model):\n    user_id = models.CharField(max_length=20, unique=True)\n    email = models.EmailField(unique=True)\n    phone = models.CharField(max_length=20, unique=True)\n    password_hash = models.CharField(max_length=255)\n    first_name = models.CharField(max_length=100)\n    last_name = models.CharField(max_length=100)\n    country_code = models.CharField(max_length=5, default=\'KE\')\n    date_of_birth = models.DateField(null=True, blank=True)\n    profile_picture = models.CharField(max_length=255, null=True, blank=True)\n    \n    ACCOUNT_STATUS_CHOICES = [\n        (\'active\', \'Active\'),\n        (\'suspended\', \'Suspended\'),\n        (\'pending\', \'Pending\'),\n        (\'closed\', \'Closed\'),\n    ]\n    account_status = models.CharField(max_length=20, choices=ACCOUNT_STATUS_CHOICES, default=\'active\')\n    \n    email_verified = models.BooleanField(default=False)\n    phone_verified = models.BooleanField(default=False)\n    \n    KYC_STATUS_CHOICES = [\n        (\'unverified\', \'Unverified\'),\n        (\'pending\', \'Pending\'),\        (\'verified\', \'Verified\'),\
-        (\'rejected\', \'Rejected\'),\
-    ]\
-    kyc_status = models.CharField(max_length=20, choices=KYC_STATUS_CHOICES, default=\'unverified\')\
-    \
-    referral_code = models.CharField(max_length=20, unique=True)\
-    referred_by = models.CharField(max_length=20, null=True, blank=True)\
-    \
-    created_at = models.DateTimeField(auto_now_add=True)\
-    updated_at = models.DateTimeField(auto_now=True)\
-    last_login = models.DateTimeField(null=True, blank=True)\
-    \
-    class Meta:\
-        db_table = \'users\'\
-    \
-    def set_password(self, raw_password):\
-        self.password_hash = make_password(raw_password)\
-    \
-    def check_password(self, raw_password):\
-        return check_password(raw_password, self.password_hash)\
-    \
-    @staticmethod\
-    def generate_user_id():\
-        last_user = User.objects.order_by(\'-id\').first()\
-        if last_user and last_user.user_id:\
-            last_number = int(last_user.user_id.split(\'-\')[-1])\
-            new_number = last_number + 1\
-        else:\
-            new_number = 1\
-        return f\"KE-QC-{str(new_number).zfill(5)}\"\
-    \
-    @staticmethod\
-    def generate_referral_code():\
-        return \'\'.join(random.choices(string.ascii_uppercase + string.digits, k=8))\
-    \
-    def __str__(self):\
-        return f\"{self.user_id} - {self.email}\"\
+from django.db import models
+from django.contrib.auth.hashers import make_password, check_password
+from django.utils import timezone
+import uuid
+from datetime import timedelta
+import random
+import string
+
+class User(models.Model):
+    user_id = models.CharField(max_length=20, unique=True)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=20, unique=True)
+    password_hash = models.CharField(max_length=255)
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    country_code = models.CharField(max_length=5, default='KE')
+    date_of_birth = models.DateField(null=True, blank=True)
+    profile_picture = models.CharField(max_length=255, null=True, blank=True)
+    
+    ACCOUNT_STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('suspended', 'Suspended'),
+        ('pending', 'Pending'),
+        ('closed', 'Closed'),
+    ]
+    account_status = models.CharField(max_length=20, choices=ACCOUNT_STATUS_CHOICES, default='active')
+    
+    email_verified = models.BooleanField(default=False)
+    phone_verified = models.BooleanField(default=False)
+    
+    KYC_STATUS_CHOICES = [
+        ('unverified', 'Unverified'),
+        ('pending', 'Pending'),
+        ('verified', 'Verified'),
+        ('rejected', 'Rejected'),
+    ]
+    kyc_status = models.CharField(max_length=20, choices=KYC_STATUS_CHOICES, default='unverified')
+    
+    referral_code = models.CharField(max_length=20, unique=True)
+    referred_by = models.CharField(max_length=20, null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    last_login = models.DateTimeField(null=True, blank=True)
+    
+    class Meta:
+        db_table = 'users'
+    
+    def set_password(self, raw_password):
+        self.password_hash = make_password(raw_password)
+    
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password_hash)
+    
+    @staticmethod
+    def generate_user_id(country_code='KE'):
+        """
+        Generate user ID based on country code.
+        Format: {COUNTRY_CODE}-QC-{NUMBER}
+        Example: KE-QC-00001, US-QC-00001
+        """
+        # Get the last user with the same country code
+        last_user = User.objects.filter(country_code=country_code).order_by('-id').first()
+        if last_user and last_user.user_id:
+            try:
+                # Extract the number from user_id (e.g., "KE-QC-00001" -> 1)
+                parts = last_user.user_id.split('-')
+                if len(parts) >= 3:
+                    last_number = int(parts[-1])
+                    new_number = last_number + 1
+                else:
+                    new_number = 1
+            except (ValueError, IndexError):
+                new_number = 1
+        else:
+            new_number = 1
+        return f"{country_code}-QC-{str(new_number).zfill(5)}"
+    
+    @staticmethod
+    def generate_referral_code():
+        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+    
+    def __str__(self):
+        return f"{self.user_id} - {self.email}"
+
+
+class PasswordResetToken(models.Model):
+    """
+    Stores password reset tokens (email-based) with expiration and one-time use.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'password_reset_tokens'
+        indexes = [
+            models.Index(fields=['token']),
+            models.Index(fields=['user', 'created_at']),
+        ]
+
+    @property
+    def is_used(self):
+        return self.used_at is not None
+
+    @property
+    def is_expired(self):
+        return timezone.now() >= self.expires_at
+
+    @classmethod
+    def create_for_user(cls, user, ttl_minutes=15):
+        # Invalidate previous unused tokens for this user (optional but helps reduce confusion)
+        cls.objects.filter(user=user, used_at__isnull=True).update(used_at=timezone.now())
+
+        token = uuid.uuid4().hex  # 32 chars
+        # Ensure uniqueness (extremely unlikely collision, but be safe)
+        while cls.objects.filter(token=token).exists():
+            token = uuid.uuid4().hex
+
+        return cls.objects.create(
+            user=user,
+            token=token,
+            expires_at=timezone.now() + timedelta(minutes=ttl_minutes),
+        )
 

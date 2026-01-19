@@ -4,7 +4,7 @@ Write-Host "Starting Quantum Capital Platform setup..."
 
 # Define paths relative to the script's location
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
-$projectRoot = $scriptDir # The project root is now the current directory (emphasis)
+$projectRoot = Split-Path -Parent $scriptDir # The project root is the parent of scripts directory
 $backendDir = Join-Path $projectRoot "backend"
 $frontendDir = Join-Path $projectRoot "frontend"
 $backendRequirements = Join-Path $backendDir "requirements.txt"
