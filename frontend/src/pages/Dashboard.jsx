@@ -1,12 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Wallet, TrendingUp, Bot, DollarSign, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import StatCard from '../components/dashboard/StatCard';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
 import { LineChart, Line, AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { dashboardAPI } from '../services/dashboard';
-import { useToast } from '../contexts/ToastContext';
+
+// Mock data
+const performanceData = [
+  { date: 'Mon', value: 25000 },
+  { date: 'Tue', value: 28000 },
+  { date: 'Wed', value: 32000 },
+  { date: 'Thu', value: 29500 },
+  { date: 'Fri', value: 35000 },
+  { date: 'Sat', value: 38000 },
+  { date: 'Sun', value: 42000 },
+];
+
+const fundAllocationData = [
+  { name: 'Active Trading', value: 75, color: '#00D9FF' },
+  { name: 'Reserved', value: 25, color: '#14B8A6' },
+];
+
+const recentTransactions = [
+  { id: 1, type: 'Deposit', method: 'M-Pesa', amount: 50000, date: '2024-01-15', status: 'completed', icon: ArrowDownRight },
+  { id: 2, type: 'Profit', method: 'Trading Bot', amount: 2500, date: '2024-01-14', status: 'completed', icon: ArrowUpRight },
+  { id: 3, type: 'Withdrawal', method: 'USDT TRC20', amount: 10000, date: '2024-01-13', status: 'pending', icon: ArrowUpRight },
+  { id: 4, type: 'Profit', method: 'Trading Bot', amount: 1800, date: '2024-01-12', status: 'completed', icon: ArrowUpRight },
+  { id: 5, type: 'Deposit', method: 'Bitcoin', amount: 75000, date: '2024-01-10', status: 'completed', icon: ArrowDownRight },
+];
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
@@ -24,58 +46,6 @@ const CustomTooltip = ({ active, payload }) => {
 
 const Dashboard = ({ user, onLogout }) => {
   const [selectedPeriod, setSelectedPeriod] = useState('7d');
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    total_balance: 0,
-    total_profit: 0,
-    bot_performance: 0,
-    platform_fee: 0,
-  });
-  const [performanceData, setPerformanceData] = useState([]);
-  const [fundAllocationData, setFundAllocationData] = useState([]);
-  const [recentTransactions, setRecentTransactions] = useState([]);
-  const { error: showError } = useToast();
-  
-  useEffect(() => {
-    loadDashboardData();
-  }, [selectedPeriod]);
-  
-  const loadDashboardData = async () => {
-    setLoading(true);
-    try {
-      // Load stats
-      const statsData = await dashboardAPI.getStats();
-      setStats(statsData);
-      
-      // Load performance data
-      const perfData = await dashboardAPI.getPerformance(selectedPeriod);
-      setPerformanceData(perfData.data || []);
-      
-      // Load fund allocation
-      const allocationData = await dashboardAPI.getFundAllocation();
-      setFundAllocationData(allocationData.data || []);
-      
-      // Load recent transactions
-      const transactionsData = await dashboardAPI.getRecentTransactions(5);
-      const transactions = (transactionsData.transactions || []).map(t => ({
-        ...t,
-        icon: t.type === 'Deposit' ? ArrowDownRight : ArrowUpRight,
-      }));
-      setRecentTransactions(transactions);
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      showError('Failed to load dashboard data');
-      // Use empty/default data on error
-      setPerformanceData([]);
-      setFundAllocationData([
-        { name: 'Active Trading', value: 75, color: '#00D9FF' },
-        { name: 'Reserved', value: 25, color: '#14B8A6' },
-      ]);
-      setRecentTransactions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
   
   return (
     <Layout user={user} onLogout={onLogout}>
@@ -87,48 +57,40 @@ const Dashboard = ({ user, onLogout }) => {
         </div>
         
         {/* Stats Cards Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-32 bg-gray-200 rounded-xl animate-pulse"></div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard
-              title="Total Balance"
-              value={`KES ${stats.total_balance?.toLocaleString() || '0'}`}
-              change="+12.5%"
-              changeType="positive"
-              icon={Wallet}
-              iconColor="bg-gradient-button-primary"
-            />
-            <StatCard
-              title="Total Profit"
-              value={`KES ${stats.total_profit?.toLocaleString() || '0'}`}
-              change="+31.2%"
-              changeType="positive"
-              icon={TrendingUp}
-              iconColor="bg-gradient-success"
-            />
-            <StatCard
-              title="Bot Performance"
-              value={`${stats.bot_performance || 0}%`}
-              change="Win Rate"
-              changeType="positive"
-              icon={Bot}
-              iconColor="bg-gradient-to-r from-purple-500 to-pink-500"
-            />
-            <StatCard
-              title="Platform Fee"
-              value={`KES ${stats.platform_fee?.toLocaleString() || '0'}`}
-              change="10%"
-              changeType="neutral"
-              icon={DollarSign}
-              iconColor="bg-gradient-to-r from-orange-500 to-yellow-500"
-            />
-          </div>
-        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard
+            title="Total Balance"
+            value="KES 420,000"
+            change="+12.5%"
+            changeType="positive"
+            icon={Wallet}
+            iconColor="bg-gradient-button-primary"
+          />
+          <StatCard
+            title="Total Profit"
+            value="KES 95,000"
+            change="+31.2%"
+            changeType="positive"
+            icon={TrendingUp}
+            iconColor="bg-gradient-success"
+          />
+          <StatCard
+            title="Bot Performance"
+            value="87.5%"
+            change="Win Rate"
+            changeType="positive"
+            icon={Bot}
+            iconColor="bg-gradient-to-r from-purple-500 to-pink-500"
+          />
+          <StatCard
+            title="Platform Fee"
+            value="KES 42,000"
+            change="10%"
+            changeType="neutral"
+            icon={DollarSign}
+            iconColor="bg-gradient-to-r from-orange-500 to-yellow-500"
+          />
+        </div>
         
         {/* Performance Chart */}
         <Card className="p-6">
@@ -155,7 +117,7 @@ const Dashboard = ({ user, onLogout }) => {
           </div>
           
           <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={performanceData.length > 0 ? performanceData : [{ date: 'No Data', value: 0 }]}>
+            <AreaChart data={performanceData}>
               <defs>
                 <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#00D9FF" stopOpacity={0.3}/>
@@ -234,14 +196,9 @@ const Dashboard = ({ user, onLogout }) => {
             </div>
             
             <div className="space-y-4">
-              {loading ? (
-                <div className="text-center py-8 text-text-gray">Loading transactions...</div>
-              ) : recentTransactions.length === 0 ? (
-                <div className="text-center py-8 text-text-gray">No transactions yet</div>
-              ) : (
-                recentTransactions.map((transaction) => {
-                  const Icon = transaction.icon;
-                  const isPositive = transaction.type === 'Profit' || transaction.type === 'Deposit';
+              {recentTransactions.map((transaction) => {
+                const Icon = transaction.icon;
+                const isPositive = transaction.type === 'Profit' || transaction.type === 'Deposit';
                 
                 return (
                   <div
@@ -280,8 +237,7 @@ const Dashboard = ({ user, onLogout }) => {
                     </div>
                   </div>
                 );
-                })
-              )}
+              })}
             </div>
           </Card>
         </div>

@@ -2,10 +2,10 @@ import apiClient from './api';
 
 // Authentication endpoints
 export const authAPI = {
-  // Login
-  login: async (email, password) => {
+  // Login (accepts email or user_id)
+  login: async (emailOrUserId, password) => {
     const response = await apiClient.post('/auth/login/', {
-      email,
+      email_or_user_id: emailOrUserId, // Backend should handle both
       password,
     });
     return response.data;

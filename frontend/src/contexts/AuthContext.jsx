@@ -77,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await authAPI.register(userData);
-      success('Registration successful! Please login.');
+      success('Registration successful!');
       return { success: true, data: response };
     } catch (error) {
       const errorMessage = error.response?.data?.detail || error.response?.data?.message || 'Registration failed. Please try again.';

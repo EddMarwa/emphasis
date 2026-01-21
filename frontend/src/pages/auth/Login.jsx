@@ -7,7 +7,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
+    emailOrUserId: '', // Can be email or user ID
     password: '',
     rememberMe: false,
   });
@@ -21,10 +21,8 @@ const Login = () => {
   const validate = () => {
     const newErrors = {};
     
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+    if (!formData.emailOrUserId.trim()) {
+      newErrors.emailOrUserId = 'Email or User ID is required';
     }
     
     if (!formData.password) {
@@ -47,7 +45,8 @@ const Login = () => {
     setLoading(true);
     
     try {
-      const result = await login(formData.email, formData.password);
+      // Pass email or user ID to login function
+      const result = await login(formData.emailOrUserId, formData.password);
       
       if (result.success) {
         // Redirect on success
@@ -111,14 +110,17 @@ const Login = () => {
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <Input
-                type="email"
-                label="Email Address"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                error={errors.email}
+                type="text"
+                label="Email or User ID"
+                placeholder="Enter your email or User ID (e.g., KE-QC-00001)"
+                value={formData.emailOrUserId}
+                onChange={(e) => setFormData({ ...formData, emailOrUserId: e.target.value })}
+                error={errors.emailOrUserId || errors.email}
                 required
               />
+              <p className="text-xs text-text-gray -mt-2 mb-2">
+                You can login using your email address or User ID
+              </p>
               
               <div className="relative">
                 <Input

@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import { useToast } from '../../contexts/ToastContext';
-import { authAPI } from '../../services/auth';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -12,10 +11,8 @@ const ForgotPassword = () => {
   const [sent, setSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState('');
-  const [devToken, setDevToken] = useState('');
   
   const { success, error: showError } = useToast();
-  const navigate = useNavigate();
   
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,13 +29,14 @@ const ForgotPassword = () => {
     }
     
     setLoading(true);
-    try {
-      const resp = await authAPI.forgotPassword(email);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setLoading(false);
       setSent(true);
       setCountdown(60);
-      setDevToken(resp?.token || '');
-      success(resp?.message || 'If an account exists, reset instructions were sent.');
-
+      success('Reset code sent to your email!');
+      
       // Start countdown
       const interval = setInterval(() => {
         setCountdown((prev) => {
@@ -49,23 +47,13 @@ const ForgotPassword = () => {
           return prev - 1;
         });
       }, 1000);
-    } catch (err) {
-      const msg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        'Failed to request password reset. Please try again.';
-      showError(msg);
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
+    }, 1500);
   };
   
   const handleResend = () => {
     if (countdown > 0) return;
     setSent(false);
     setEmail('');
-    setDevToken('');
   };
   
   return (
@@ -131,22 +119,6 @@ const ForgotPassword = () => {
               <p className="text-sm text-text-gray mb-6">
                 Please check your inbox and enter the code to reset your password.
               </p>
-
-              {devToken && (
-                <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 text-left mb-4">
-                  <p className="text-xs text-text-gray mb-2">
-                    Dev mode token (shown only because email sending isn’t wired yet):
-                  </p>
-                  <p className="font-mono text-sm break-all">{devToken}</p>
-                  <Button
-                    variant="primary"
-                    className="w-full mt-3"
-                    onClick={() => navigate(`/reset-password?token=${encodeURIComponent(devToken)}`)}
-                  >
-                    Reset Password Now
-                  </Button>
-                </div>
-              )}
               
               {countdown > 0 && (
                 <p className="text-sm text-text-gray mb-4">

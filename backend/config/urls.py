@@ -16,8 +16,6 @@ def status_view(_request):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/status', status_view),
-    path('api/auth/', include('apps.users.auth_urls')),
-    path('api/', include('apps.users.user_urls')),  # Include users endpoints (profile, etc.)
-    path('api/', include('apps.core.urls')),  # Include dashboard endpoints
+    path('api/auth/', include('apps.users.urls')),
 ]
 

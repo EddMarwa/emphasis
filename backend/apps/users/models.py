@@ -1,8 +1,5 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
-from django.utils import timezone
-import uuid
-from datetime import timedelta
 import random
 import string
 
@@ -82,46 +79,4 @@ class User(models.Model):
     
     def __str__(self):
         return f"{self.user_id} - {self.email}"
-
-
-class PasswordResetToken(models.Model):
-    """
-    Stores password reset tokens (email-based) with expiration and one-time use.
-    """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_tokens')
-    token = models.CharField(max_length=64, unique=True, db_index=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField()
-    used_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'password_reset_tokens'
-        indexes = [
-            models.Index(fields=['token']),
-            models.Index(fields=['user', 'created_at']),
-        ]
-
-    @property
-    def is_used(self):
-        return self.used_at is not None
-
-    @property
-    def is_expired(self):
-        return timezone.now() >= self.expires_at
-
-    @classmethod
-    def create_for_user(cls, user, ttl_minutes=15):
-        # Invalidate previous unused tokens for this user (optional but helps reduce confusion)
-        cls.objects.filter(user=user, used_at__isnull=True).update(used_at=timezone.now())
-
-        token = uuid.uuid4().hex  # 32 chars
-        # Ensure uniqueness (extremely unlikely collision, but be safe)
-        while cls.objects.filter(token=token).exists():
-            token = uuid.uuid4().hex
-
-        return cls.objects.create(
-            user=user,
-            token=token,
-            expires_at=timezone.now() + timedelta(minutes=ttl_minutes),
-        )
 

@@ -19,7 +19,6 @@ export const userAPI = {
     const response = await apiClient.post('/users/change-password/', {
       old_password: oldPassword,
       new_password: newPassword,
-      confirm_password: newPassword,  // Backend expects this
     });
     return response.data;
   },
