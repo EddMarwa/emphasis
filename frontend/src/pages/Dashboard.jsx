@@ -53,7 +53,7 @@ const Dashboard = ({ user, onLogout }) => {
         {/* Page Header */}
         <div>
           <h1 className="text-3xl font-bold text-text-dark mb-2">Dashboard</h1>
-          <p className="text-text-gray">Welcome back, {user?.username || 'User'}! Here's your investment overview.</p>
+          <p className="text-text-gray">Welcome back, {(user?.first_name || user?.nickname || user?.username || '').trim() || 'Investor'}! Here's your investment overview.</p>
         </div>
         
         {/* Stats Cards Grid */}
