@@ -17,5 +17,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/status', status_view),
     path('api/auth/', include('apps.users.urls')),
+    path('api/', include('apps.investments.urls')),
+    path('api/', include('apps.payments.urls')),
+    path('api/admin/', include('apps.admin_panel.urls')),
+    path('api/kyc/', include('apps.kyc.urls')),
+    path('api/bot/', include('apps.bot.urls')),
 ]
 

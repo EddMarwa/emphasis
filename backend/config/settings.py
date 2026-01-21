@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.investments',
     'apps.payments',
+    'apps.admin_panel',
+    'apps.kyc',
     'apps.bot',
     'apps.referrals',
     'apps.chat',
