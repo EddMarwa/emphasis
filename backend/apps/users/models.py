@@ -24,6 +24,10 @@ class User(models.Model):
     
     email_verified = models.BooleanField(default=False)
     phone_verified = models.BooleanField(default=False)
+
+    # Two-factor auth (TOTP)
+    otp_secret = models.CharField(max_length=32, null=True, blank=True)
+    otp_enabled = models.BooleanField(default=False)
     
     KYC_STATUS_CHOICES = [
         ('unverified', 'Unverified'),

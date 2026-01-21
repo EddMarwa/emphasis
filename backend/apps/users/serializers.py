@@ -80,7 +80,8 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'user_id', 'email', 'phone', 'first_name', 'last_name',
             'country_code', 'account_status', 'kyc_status',
-            'email_verified', 'phone_verified', 'created_at'
+            'email_verified', 'phone_verified', 'created_at',
+            'otp_enabled'
         )
         read_only_fields = ('user_id', 'created_at')
 
@@ -88,6 +89,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email_or_user_id = serializers.CharField(required=True)
     password = serializers.CharField(required=True, write_only=True)
+    otp_code = serializers.CharField(required=False, write_only=True, allow_blank=True)
     
     def validate_email_or_user_id(self, value):
         if not value:
