@@ -84,3 +84,50 @@ class User(models.Model):
     def __str__(self):
         return f"{self.user_id} - {self.email}"
 
+
+class LoginHistory(models.Model):
+    """Track all user login attempts"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_history')
+    login_time = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=500, blank=True)
+    success = models.BooleanField(default=True)
+    device_info = models.CharField(max_length=255, blank=True)
+    
+    class Meta:
+        db_table = 'login_history'
+        ordering = ['-login_time']
+        indexes = [
+            models.Index(fields=['user', '-login_time']),
+            models.Index(fields=['-login_time']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.user_id} - {self.login_time} - {'Success' if self.success else 'Failed'}"
+
+
+class FailedLoginAttempt(models.Model):
+    """Track failed login attempts for security monitoring"""
+    email_or_user_id = models.CharField(max_length=255)
+    attempt_time = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=500, blank=True)
+    reason = models.CharField(max_length=100, choices=[
+        ('invalid_credentials', 'Invalid Credentials'),
+        ('account_suspended', 'Account Suspended'),
+        ('account_inactive', 'Account Inactive'),
+        ('invalid_2fa', 'Invalid 2FA Code'),
+        ('user_not_found', 'User Not Found'),
+    ])
+    
+    class Meta:
+        db_table = 'failed_login_attempts'
+        ordering = ['-attempt_time']
+        indexes = [
+            models.Index(fields=['-attempt_time']),
+            models.Index(fields=['ip_address', '-attempt_time']),
+        ]
+    
+    def __str__(self):
+        return f"{self.email_or_user_id} - {self.attempt_time} - {self.reason}"
+
