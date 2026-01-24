@@ -18,11 +18,9 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     termsAccepted: false,
-    referralCode: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [showReferral, setShowReferral] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [passwordStrength, setPasswordStrength] = useState(0);
@@ -126,7 +124,6 @@ const Register = () => {
         country_code: formData.country,
         password: formData.password,
         confirm_password: formData.confirmPassword,
-        referral_code: formData.referralCode || null,
       };
       
       const result = await register(registrationData);
@@ -304,29 +301,6 @@ const Register = () => {
               >
                 {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
-            </div>
-            
-            {/* Referral Code Section */}
-            <div className="border border-gray-200 rounded-xl p-4">
-              <button
-                type="button"
-                onClick={() => setShowReferral(!showReferral)}
-                className="w-full flex items-center justify-between text-left"
-              >
-                <span className="text-sm font-medium text-text-gray">Have a referral code? (Optional)</span>
-                {showReferral ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </button>
-              
-              {showReferral && (
-                <div className="mt-4 animate-slide-up">
-                  <Input
-                    type="text"
-                    placeholder="Enter referral code"
-                    value={formData.referralCode}
-                    onChange={(e) => setFormData({ ...formData, referralCode: e.target.value.toUpperCase() })}
-                  />
-                </div>
-              )}
             </div>
             
             <div>

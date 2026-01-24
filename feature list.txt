@@ -278,3 +278,4 @@ Deployment:
 •	Frontend: Vercel / Netlify
 •	Database: Supabase / Railway
 
+$env:Path = "D:\PROJECTS\emphasis\.venv\Scripts;$env:Path"; cd D:\PROJECTS\emphasis\backend; python manage.py runserver
