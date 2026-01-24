@@ -215,7 +215,7 @@ const Profile = ({ user: userProp, onLogout }) => {
               <div className="p-4 bg-gray-50 rounded-xl md:col-span-2">
                 <div className="flex items-center gap-3 mb-2">
                   <User size={20} className="text-electric-blue" />
-                  <span className="text-sm font-medium text-text-gray">User ID</span>
+                  <span className="text-sm font-medium text-text-gray">UID</span>
                 </div>
                 <p className="font-mono font-bold text-text-dark text-lg mt-2">{user.user_id}</p>
               </div>

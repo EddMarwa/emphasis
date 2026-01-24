@@ -4,13 +4,13 @@ import apiClient from './api';
 export const adminAPI = {
   // Get admin stats
   getStats: async () => {
-    const response = await apiClient.get('/admin/stats/');
+    const response = await apiClient.get('/admin/dashboard/statistics/');
     return response.data;
   },
 
   // Get all users
   getUsers: async (page = 1, limit = 20, search = '') => {
-    const response = await apiClient.get('/admin/users/', {
+    const response = await apiClient.get('/admin/users/list_users/', {
       params: { page, limit, search },
     });
     return response.data;
@@ -18,47 +18,65 @@ export const adminAPI = {
 
   // Get user details
   getUserDetails: async (userId) => {
-    const response = await apiClient.get(`/admin/users/${userId}/`);
+    const response = await apiClient.get('/admin/users/user_detail/', {
+      params: { pk: userId }
+    });
     return response.data;
   },
 
-  // Update user status
-  updateUserStatus: async (userId, status) => {
-    const response = await apiClient.patch(`/admin/users/${userId}/`, {
-      account_status: status,
+  // Suspend user
+  suspendUser: async (userId, reason) => {
+    const response = await apiClient.post('/admin/users/suspend_user/', {
+      user_id: userId,
+      reason
+    });
+    return response.data;
+  },
+
+  // Activate user
+  activateUser: async (userId, reason) => {
+    const response = await apiClient.post('/admin/users/activate_user/', {
+      user_id: userId,
+      reason
     });
     return response.data;
   },
 
   // Bot control
   getBotStatus: async () => {
-    const response = await apiClient.get('/admin/bot/status/');
+    const response = await apiClient.get('/bot/config/my_config/');
     return response.data;
   },
 
   startBot: async () => {
-    const response = await apiClient.post('/admin/bot/start/');
+    const response = await apiClient.post('/bot/config/start_bot/');
     return response.data;
   },
 
   stopBot: async () => {
-    const response = await apiClient.post('/admin/bot/stop/');
+    const response = await apiClient.post('/bot/config/stop_bot/');
     return response.data;
   },
 
   // Pending withdrawals
   getPendingWithdrawals: async () => {
-    const response = await apiClient.get('/admin/withdrawals/pending/');
+    const response = await apiClient.get('/admin/withdrawals/pending_withdrawals/');
     return response.data;
   },
 
-  approveWithdrawal: async (withdrawalId) => {
-    const response = await apiClient.post(`/admin/withdrawals/${withdrawalId}/approve/`);
+  approveWithdrawal: async (withdrawalId, reason) => {
+    const response = await apiClient.post('/admin/withdrawals/approve_withdrawal/', {
+      withdrawal_id: withdrawalId,
+      reason
+    });
     return response.data;
   },
 
-  rejectWithdrawal: async (withdrawalId) => {
-    const response = await apiClient.post(`/admin/withdrawals/${withdrawalId}/reject/`);
+  rejectWithdrawal: async (withdrawalId, reason) => {
+    const response = await apiClient.post('/admin/withdrawals/reject_withdrawal/', {
+      withdrawal_id: withdrawalId,
+      reason
+    });
     return response.data;
   },
 
