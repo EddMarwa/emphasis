@@ -4,10 +4,10 @@ from .models import KYCDocument, KYCVerificationLog, KYCRejectionTemplate, KYCWi
 
 @admin.register(KYCDocument)
 class KYCDocumentAdmin(admin.ModelAdmin):
-    list_display = ['user', 'status', 'verification_level', 'created_at']
-    list_filter = ['status', 'verification_level', 'created_at']
+    list_display = ['user', 'status', 'verification_level', 'submitted_at']
+    list_filter = ['status', 'verification_level', 'submitted_at']
     search_fields = ['user__username', 'user__email', 'full_name']
-    readonly_fields = ['created_at', 'updated_at', 'auto_verified', 'verification_score']
+    readonly_fields = ['submitted_at', 'updated_at']
     fieldsets = (
         ('User', {'fields': ('user',)}),
         ('Personal Information', {
@@ -38,55 +38,52 @@ class KYCDocumentAdmin(admin.ModelAdmin):
             'fields': (
                 'status',
                 'verification_level',
-                'auto_verified',
-                'verification_score',
+                'verified_by',
+                'verification_date',
                 'expiry_date'
             )
         }),
-        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+        ('Timestamps', {'fields': ('submitted_at', 'updated_at')}),
     )
 
 
 @admin.register(KYCVerificationLog)
 class KYCVerificationLogAdmin(admin.ModelAdmin):
-    list_display = ['kyc_document', 'action_type', 'verified_by', 'timestamp']
-    list_filter = ['action_type', 'timestamp']
-    search_fields = ['kyc_document__user__username', 'verified_by__username']
-    readonly_fields = ['timestamp']
+    list_display = ['kyc', 'action', 'performed_by', 'created_at']
+    list_filter = ['action', 'created_at']
+    search_fields = ['kyc__user__username']
+    readonly_fields = ['created_at']
     fieldsets = (
-        ('KYC Document', {'fields': ('kyc_document',)}),
+        ('KYC Document', {'fields': ('kyc',)}),
         ('Verification', {
             'fields': (
-                'action_type',
+                'action',
                 'verification_score',
-                'verified_by'
+                'performed_by'
             )
         }),
-        ('Notes', {'fields': ('verification_notes',)}),
-        ('Timestamp', {'fields': ('timestamp',)}),
+        ('Status Change', {'fields': ('old_status', 'new_status')}),
+        ('Notes', {'fields': ('notes',)}),
+        ('Timestamp', {'fields': ('created_at',)}),
     )
 
 
 @admin.register(KYCRejectionTemplate)
 class KYCRejectionTemplateAdmin(admin.ModelAdmin):
-    list_display = ['reason_type', 'is_active']
-    list_filter = ['reason_type', 'is_active']
-    readonly_fields = ['created_at']
+    list_display = ['code', 'title', 'category', 'is_active']
+    list_filter = ['category', 'is_active']
+    search_fields = ['code', 'title', 'message']
     fieldsets = (
-        ('Template Info', {'fields': ('reason_type', 'is_active')}),
-        ('Content', {'fields': ('template_message',)}),
-        ('Timestamp', {'fields': ('created_at',)}),
+        ('Template Info', {'fields': ('code', 'title', 'category', 'is_active')}),
+        ('Content', {'fields': ('message',)}),
     )
 
 
 @admin.register(KYCWithdrawalLimit)
 class KYCWithdrawalLimitAdmin(admin.ModelAdmin):
     list_display = ['verification_level', 'daily_limit', 'monthly_limit']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['verification_level']
     fieldsets = (
         ('Level', {'fields': ('verification_level',)}),
-        ('Daily Limit', {'fields': ('daily_limit',)}),
-        ('Monthly Limit', {'fields': ('monthly_limit',)}),
-        ('Per Transaction Limit', {'fields': ('per_transaction_limit',)}),
-        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+        ('Limits', {'fields': ('daily_limit', 'monthly_limit', 'transaction_limit')}),
     )

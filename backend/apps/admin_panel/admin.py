@@ -27,9 +27,9 @@ class AdminUserAdmin(admin.ModelAdmin):
 
 @admin.register(AdminLog)
 class AdminLogAdmin(admin.ModelAdmin):
-    list_display = ['admin_user', 'action_type', 'resource_type', 'timestamp']
-    list_filter = ['action_type', 'resource_type', 'timestamp']
-    search_fields = ['admin_user__user__username', 'resource_id']
+    list_display = ['admin', 'action_type', 'resource_type', 'created_at']
+    list_filter = ['action_type', 'resource_type', 'created_at']
+    search_fields = ['admin__user__username', 'resource_id']
     readonly_fields = ['created_at']
     fieldsets = (
         ('Admin Info', {'fields': ('admin_user', 'ip_address')}),
@@ -41,7 +41,7 @@ class AdminLogAdmin(admin.ModelAdmin):
 
 @admin.register(PlatformStatistics)
 class PlatformStatisticsAdmin(admin.ModelAdmin):
-    list_display = ['date', 'total_users', 'total_deposits', 'total_withdrawals']
+    list_display = ['date', 'total_users']
     list_filter = ['date']
     readonly_fields = ['created_at']
     fieldsets = (
