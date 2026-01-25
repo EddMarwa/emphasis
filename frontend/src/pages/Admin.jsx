@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Users, DollarSign, TrendingUp, Power, Search, MoreVertical, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import Layout from '../components/layout/Layout';
 import StatCard from '../components/dashboard/StatCard';
@@ -8,38 +8,93 @@ import Badge from '../components/common/Badge';
 import Input from '../components/common/Input';
 import Modal from '../components/common/Modal';
 import { useToast } from '../contexts/ToastContext';
-
-const adminStats = [
-  { id: 1, title: 'Total Users', value: '1,247', change: '+23 this week', changeType: 'positive', icon: Users },
-  { id: 2, title: 'Total AUM', value: 'KES 52.4M', change: '+8.2%', changeType: 'positive', icon: DollarSign },
-  { id: 3, title: 'Platform Revenue', value: 'KES 5.24M', change: '+12.5%', changeType: 'positive', icon: TrendingUp },
-];
-
-const recentUsers = [
-  { id: 1, userId: 'KE-QC-01247', name: 'John Doe', email: 'john@example.com', balance: 125000, status: 'active', joinedDate: '2024-01-15' },
-  { id: 2, userId: 'KE-QC-01246', name: 'Jane Smith', email: 'jane@example.com', balance: 85000, status: 'active', joinedDate: '2024-01-14' },
-  { id: 3, userId: 'KE-QC-01245', name: 'Mike Johnson', email: 'mike@example.com', balance: 200000, status: 'pending', joinedDate: '2024-01-14' },
-  { id: 4, userId: 'KE-QC-01244', name: 'Sarah Williams', email: 'sarah@example.com', balance: 50000, status: 'active', joinedDate: '2024-01-13' },
-  { id: 5, userId: 'KE-QC-01243', name: 'David Brown', email: 'david@example.com', balance: 300000, status: 'suspended', joinedDate: '2024-01-12' },
-];
-
-const pendingWithdrawals = [
-  { id: 1, userId: 'KE-QC-01247', amount: 50000, method: 'M-Pesa', date: '2024-01-15', status: 'pending' },
-  { id: 2, userId: 'KE-QC-01245', amount: 100000, method: 'USDT TRC20', date: '2024-01-14', status: 'pending' },
-  { id: 3, userId: 'KE-QC-01244', amount: 25000, method: 'M-Pesa', date: '2024-01-14', status: 'pending' },
-];
-
-const pendingKYC = [
-  { id: 1, userId: 'KE-QC-01245', name: 'Mike Johnson', submittedDate: '2024-01-14', status: 'pending' },
-  { id: 2, userId: 'KE-QC-01240', name: 'Emily Davis', submittedDate: '2024-01-13', status: 'pending' },
-];
+import adminAPI from '../services/admin';
 
 const Admin = ({ user, onLogout }) => {
   const [botStatus, setBotStatus] = useState('active');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { success, error: showError } = useToast();
+
+  // Fetch users and stats on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [usersResponse, statsResponse] = await Promise.all([
+          adminAPI.getUsers(),
+          adminAPI.getStats()
+        ]);
+        setUsers(usersResponse.data || []);
+        setStats(statsResponse.data || {});
+      } catch (err) {
+        console.error('Error fetching admin data:', err);
+        showError('Failed to load admin data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [showError]);
+
+  // Format stats for display
+  const adminStats = stats ? [
+    { 
+      id: 1, 
+      title: 'Total Users', 
+      value: stats.total_users?.toLocaleString() || '0', 
+      change: '+23 this week', 
+      changeType: 'positive', 
+      icon: Users 
+    },
+    { 
+      id: 2, 
+      title: 'Total AUM', 
+      value: `KES ${((stats.assets_under_management || 0) / 1000000).toFixed(1)}M`, 
+      change: '+8.2%', 
+      changeType: 'positive', 
+      icon: DollarSign 
+    },
+    { 
+      id: 3, 
+      title: 'Platform Revenue', 
+      value: `KES ${((stats.total_fees || 0) / 1000000).toFixed(2)}M`, 
+      change: '+12.5%', 
+      changeType: 'positive', 
+      icon: TrendingUp 
+    },
+  ] : [
+    { id: 1, title: 'Total Users', value: '0', change: '+23 this week', changeType: 'positive', icon: Users },
+    { id: 2, title: 'Total AUM', value: 'KES 0M', change: '+8.2%', changeType: 'positive', icon: DollarSign },
+    { id: 3, title: 'Platform Revenue', value: 'KES 0M', change: '+12.5%', changeType: 'positive', icon: TrendingUp },
+  ];
+
+  // Map backend user data to frontend format
+  const recentUsers = users.map(u => ({
+    id: u.id,
+    userId: u.user_id,
+    name: u.full_name || u.username,
+    email: u.email,
+    balance: parseFloat(u.balance || 0),
+    status: u.account_status,
+    joinedDate: u.created_at ? new Date(u.created_at).toLocaleDateString('en-CA') : 'N/A'
+  }));
+
+  const pendingWithdrawals = [
+    { id: 1, userId: 'KE-QC-01247', amount: 50000, method: 'M-Pesa', date: '2024-01-15', status: 'pending' },
+    { id: 2, userId: 'KE-QC-01245', amount: 100000, method: 'USDT TRC20', date: '2024-01-14', status: 'pending' },
+    { id: 3, userId: 'KE-QC-01244', amount: 25000, method: 'M-Pesa', date: '2024-01-14', status: 'pending' },
+  ];
+
+  const pendingKYC = [
+    { id: 1, userId: 'KE-QC-01245', name: 'Mike Johnson', submittedDate: '2024-01-14', status: 'pending' },
+    { id: 2, userId: 'KE-QC-01240', name: 'Emily Davis', submittedDate: '2024-01-13', status: 'pending' },
+  ];
   
   const handleBotToggle = () => {
     const newStatus = botStatus === 'active' ? 'inactive' : 'active';

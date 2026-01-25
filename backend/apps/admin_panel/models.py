@@ -63,6 +63,7 @@ class AdminLog(models.Model):
     ACTION_TYPES = [
         ('suspend_user', 'Suspend User'),
         ('activate_user', 'Activate User'),
+        ('create_user', 'Create User'),
         ('adjust_transaction', 'Adjust Transaction'),
         ('verify_kyc', 'Verify KYC'),
         ('reject_kyc', 'Reject KYC'),

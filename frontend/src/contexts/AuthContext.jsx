@@ -23,6 +23,15 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
+  const normalizeUser = (userData) => {
+    const isAdmin = Boolean(userData?.is_admin || userData?.isAdmin);
+    return {
+      ...userData,
+      is_admin: isAdmin,
+      isAdmin: isAdmin,
+    };
+  };
+
   const checkAuth = async () => {
     const token = localStorage.getItem('access_token');
     const storedUser = localStorage.getItem('user');
@@ -31,7 +40,8 @@ export const AuthProvider = ({ children }) => {
       try {
         // Verify token is still valid by fetching user data
         const userData = await authAPI.getCurrentUser();
-        setUser(userData);
+        const normalized = normalizeUser(userData);
+        setUser(normalized);
         setIsAuthenticated(true);
       } catch (error) {
         // Token invalid or expired
@@ -45,21 +55,24 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   };
 
-  const login = async (email, password) => {
+  const login = async (emailOrUserId, password) => {
     try {
-      const response = await authAPI.login(email, password);
+      const response = await authAPI.login(emailOrUserId, password);
       
       // Store tokens
       localStorage.setItem('access_token', response.access);
       localStorage.setItem('refresh_token', response.refresh);
       
       // Store user data
-      const userData = response.user || {
-        id: response.user_id,
-        username: email.split('@')[0],
-        email: email,
-        isAdmin: response.is_admin || false,
-      };
+      const userData = normalizeUser(
+        response.user || {
+          id: response.user_id,
+          username: emailOrUserId.split('@')[0],
+          email: emailOrUserId,
+          is_admin: response.is_admin || false,
+        }
+      );
+
       localStorage.setItem('user', JSON.stringify(userData));
       
       setUser(userData);

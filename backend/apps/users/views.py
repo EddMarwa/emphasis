@@ -3,7 +3,10 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+from django.db.models import Q
 import pyotp
+from apps.admin_panel.models import AdminUser
 from .models import User
 from .serializers import (
     UserRegistrationSerializer, 
@@ -11,17 +14,19 @@ from .serializers import (
     UserLoginSerializer
 )
 
+AdminAuthUser = get_user_model()
 
-def get_tokens_for_user(user):
-    """Generate JWT tokens for user"""
+
+def get_tokens_with_claims(claims: dict):
+    """Generate JWT tokens with the provided claims added to both refresh and access tokens."""
     refresh = RefreshToken()
-    refresh['user_id'] = user.user_id
-    refresh['email'] = user.email
-    
+    for key, value in claims.items():
+        refresh[key] = value
+
     access_token = refresh.access_token
-    access_token['user_id'] = user.user_id
-    access_token['email'] = user.email
-    
+    for key, value in claims.items():
+        access_token[key] = value
+
     return {
         'refresh': str(refresh),
         'access': str(access_token),
@@ -45,7 +50,12 @@ def register_view(request):
         user.save()
         
         # Generate tokens
-        tokens = get_tokens_for_user(user)
+        claims = {
+            'user_id': user.user_id,
+            'email': user.email,
+            'is_admin': False,
+        }
+        tokens = get_tokens_with_claims(claims)
         
         # Serialize user data
         user_data = UserSerializer(user).data
@@ -77,7 +87,45 @@ def login_view(request):
     email_or_user_id = serializer.validated_data['email_or_user_id']
     password = serializer.validated_data['password']
     otp_code = serializer.validated_data.get('otp_code')
-    
+
+    # --- Admin login path (Django auth users) ---
+    admin_candidate = AdminAuthUser.objects.filter(
+        Q(username=email_or_user_id) | Q(email=email_or_user_id)
+    ).first()
+
+    if admin_candidate:
+        has_admin_profile = AdminUser.objects.filter(user=admin_candidate, is_active=True).exists()
+
+        if admin_candidate.check_password(password) and admin_candidate.is_active and has_admin_profile:
+            admin_profile = AdminUser.objects.get(user=admin_candidate)
+            admin_candidate.last_login = timezone.now()
+            admin_candidate.save(update_fields=['last_login'])
+
+            claims = {
+                'is_admin': True,
+                'admin_id': admin_candidate.id,
+                'username': admin_candidate.username,
+                'email': admin_candidate.email,
+                'role': admin_profile.role,
+            }
+
+            tokens = get_tokens_with_claims(claims)
+
+            return Response({
+                'admin_id': admin_candidate.id,
+                'user': {
+                    'id': admin_candidate.id,
+                    'username': admin_candidate.username,
+                    'email': admin_candidate.email,
+                    'is_admin': True,
+                    'admin_role': admin_profile.role,
+                },
+                'access': tokens['access'],
+                'refresh': tokens['refresh'],
+                'message': 'Login successful'
+            }, status=status.HTTP_200_OK)
+        # If admin candidate exists but either password or profile invalid, fall through to user login
+
     # Try to find user by email or user_id
     try:
         if '@' in email_or_user_id:
@@ -91,7 +139,7 @@ def login_view(request):
             {'detail': 'Invalid email/User ID or password.'},
             status=status.HTTP_401_UNAUTHORIZED
         )
-    
+
     # Check password
     if not user.check_password(password):
         return Response(
@@ -130,7 +178,13 @@ def login_view(request):
     user.save()
     
     # Generate tokens
-    tokens = get_tokens_for_user(user)
+    claims = {
+        'user_id': user.user_id,
+        'email': user.email,
+        'is_admin': False,
+    }
+
+    tokens = get_tokens_with_claims(claims)
     
     # Serialize user data
     user_data = UserSerializer(user).data
@@ -200,15 +254,27 @@ def disable_2fa_view(request):
 @permission_classes([permissions.IsAuthenticated])
 def get_current_user_view(request):
     """
-    Get current authenticated user
+    Get current authenticated user (supports both regular users and admins)
     GET /api/auth/user/
     """
-    # The user is already authenticated via CustomJWTAuthentication
-    # request.user should be a User instance
+    # Regular users (custom User model)
     if hasattr(request.user, 'user_id'):
         serializer = UserSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-    else:
+        data = serializer.data
+        data['is_admin'] = False
+        return Response(data, status=status.HTTP_200_OK)
+
+    # Admin users (Django auth + AdminUser profile)
+    try:
+        admin_profile = AdminUser.objects.get(user=request.user, is_active=True)
+        return Response({
+            'id': request.user.id,
+            'username': request.user.username,
+            'email': request.user.email,
+            'is_admin': True,
+            'admin_role': admin_profile.role,
+        }, status=status.HTTP_200_OK)
+    except AdminUser.DoesNotExist:
         return Response(
             {'detail': 'User not found'},
             status=status.HTTP_404_NOT_FOUND

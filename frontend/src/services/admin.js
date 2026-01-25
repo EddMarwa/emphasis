@@ -5,7 +5,7 @@ export const adminAPI = {
   // Get admin stats
   getStats: async () => {
     const response = await apiClient.get('/admin/dashboard/statistics/');
-    return response.data;
+    return response;
   },
 
   // Get all users
@@ -13,7 +13,7 @@ export const adminAPI = {
     const response = await apiClient.get('/admin/users/list_users/', {
       params: { page, limit, search },
     });
-    return response.data;
+    return response;
   },
 
   // Get user details
@@ -93,6 +93,12 @@ export const adminAPI = {
 
   rejectKYC: async (kycId) => {
     const response = await apiClient.post(`/admin/kyc/${kycId}/reject/`);
+    return response.data;
+  },
+
+  // Create user (admin initiated)
+  createUser: async (payload) => {
+    const response = await apiClient.post('/admin/users/create_user/', payload);
     return response.data;
   },
 };

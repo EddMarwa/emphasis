@@ -49,10 +49,11 @@ const Login = () => {
       const result = await login(formData.emailOrUserId, formData.password);
       
       if (result.success) {
+        const target = result.user?.is_admin || result.user?.isAdmin ? '/admin' : '/dashboard';
         // Redirect on success
         setTimeout(() => {
-          navigate('/dashboard');
-        }, 500);
+          navigate(target);
+        }, 300);
       } else {
         // Error is already shown by auth context
         setErrors({ general: result.error });

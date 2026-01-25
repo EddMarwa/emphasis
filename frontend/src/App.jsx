@@ -147,7 +147,7 @@ const AppRoutes = () => {
       />
 
       {/* Default Route */}
-      <Route path="/" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
+      <Route path="/" element={<Navigate to={user ? ((user.is_admin || user.isAdmin) ? "/admin" : "/dashboard") : "/login"} replace />} />
       
       {/* 404 Route */}
       <Route
