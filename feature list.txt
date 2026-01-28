@@ -1,13 +1,13 @@
 QUANTUM CAPITAL - COMPLETE FEATURE LIST
 
-PHASE 1: CORE FEATURES (BUILD FIRST)
+`PHASE 1: CORE FEATURES (BUILD FIRST)
 1. User Management
-•	User registration (email/phone) ✅
-•	User login/logout ✅
-•	User profile management✅
-•	Unique User ID generation and assignment✅
-•	Account status management (active/suspended/pending)✅
-•	User dashboard✅
+•	User registration (email/phone)
+•	User login/logout
+•	User profile management
+•	Unique User ID generation and assignment
+•	Account status management (active/suspended/pending)
+•	User dashboard
 2. Authentication & Security
 •	JWT token-based authentication
 •	Password hashing (bcrypt/argon2)
@@ -62,7 +62,7 @@ PHASE 1: CORE FEATURES (BUILD FIRST)
 •	User profit statements
 •	Platform fee calculations (10% of profits)
 •	Fee breakdown display
-•	Monthly summaries
+•	Monthly summaries`
 ________________________________________
 PHASE 2: ENHANCEMENT FEATURES (ADD-ONS)
 10. Live Chat Support System
@@ -278,3 +278,4 @@ Deployment:
 •	Frontend: Vercel / Netlify
 •	Database: Supabase / Railway
 
+$env:Path = "D:\PROJECTS\emphasis\.venv\Scripts;$env:Path"; cd D:\PROJECTS\emphasis\backend; python manage.py runserver
