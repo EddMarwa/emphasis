@@ -4,6 +4,10 @@ from .views import (
     AdminDashboardView, UserManagementViewSet, WithdrawalManagementViewSet,
     SystemConfigurationViewSet, ReportingViewSet, TransactionAdjustmentViewSet
 )
+from .additional_views import (
+    edit_user, user_activity_logs, export_users_excel, 
+    export_transactions_excel, platform_revenue_report
+)
 
 router = DefaultRouter()
 router.register(r'dashboard', AdminDashboardView, basename='admin-dashboard')
@@ -15,4 +19,10 @@ router.register(r'transactions', TransactionAdjustmentViewSet, basename='transac
 
 urlpatterns = [
     path('', include(router.urls)),
+    # Additional admin endpoints
+    path('users/edit/', edit_user, name='edit-user'),
+    path('users/activity-logs/', user_activity_logs, name='user-activity-logs'),
+    path('export/users/', export_users_excel, name='export-users'),
+    path('export/transactions/', export_transactions_excel, name='export-transactions'),
+    path('revenue/report/', platform_revenue_report, name='revenue-report'),
 ]

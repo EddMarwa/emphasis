@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'apps.chat',
     'apps.training',
     'apps.suggestions',
+    'apps.notifications',
     'apps.core',
 ]
 

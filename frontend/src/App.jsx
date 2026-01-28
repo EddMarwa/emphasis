@@ -12,6 +12,7 @@ import ForgotPassword from './pages/auth/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import Funds from './pages/Funds';
 import Referrals from './pages/Referrals';
+import Leaderboard from './pages/Leaderboard';
 import Training from './pages/Training';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
@@ -118,6 +119,14 @@ const AppRoutes = () => {
         element={
           <ProtectedRoute>
             <Referrals user={user} onLogout={logout} />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/leaderboard"
+        element={
+          <ProtectedRoute>
+            <Leaderboard user={user} onLogout={logout} />
           </ProtectedRoute>
         }
       />

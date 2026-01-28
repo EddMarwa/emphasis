@@ -101,5 +101,47 @@ export const adminAPI = {
     const response = await apiClient.post('/admin/users/create_user/', payload);
     return response.data;
   },
+
+  // Edit user
+  editUser: async (userId, userData) => {
+    const response = await apiClient.post('/admin/users/edit/', {
+      user_id: userId,
+      ...userData
+    });
+    return response.data;
+  },
+
+  // Get user activity logs
+  getUserActivityLogs: async (userId, days = 30) => {
+    const response = await apiClient.get('/admin/users/activity-logs/', {
+      params: { user_id: userId, days }
+    });
+    return response.data;
+  },
+
+  // Export users to Excel
+  exportUsers: async () => {
+    const response = await apiClient.get('/admin/export/users/', {
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  // Export transactions to Excel
+  exportTransactions: async (days = 30) => {
+    const response = await apiClient.get('/admin/export/transactions/', {
+      params: { days },
+      responseType: 'blob'
+    });
+    return response.data;
+  },
+
+  // Get platform revenue report
+  getRevenueReport: async (period = 'monthly') => {
+    const response = await apiClient.get('/admin/revenue/report/', {
+      params: { period }
+    });
+    return response.data;
+  },
 };
 

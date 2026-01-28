@@ -8,7 +8,7 @@ import Badge from '../components/common/Badge';
 import Input from '../components/common/Input';
 import Modal from '../components/common/Modal';
 import { useToast } from '../contexts/ToastContext';
-import adminAPI from '../services/admin';
+import { adminAPI } from '../services/admin';
 
 const Admin = ({ user, onLogout }) => {
   const [botStatus, setBotStatus] = useState('active');

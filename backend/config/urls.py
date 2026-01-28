@@ -22,5 +22,6 @@ urlpatterns = [
     path('api/admin/', include('apps.admin_panel.urls')),
     path('api/kyc/', include('apps.kyc.urls')),
     path('api/bot/', include('apps.bot.urls')),
+    path('api/referrals/', include('apps.referrals.urls')),
 ]
 

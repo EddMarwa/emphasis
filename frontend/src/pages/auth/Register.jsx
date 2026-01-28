@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Phone, Eye, EyeOff, ChevronDown, ChevronUp, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Mail, Lock, User, Phone, Eye, EyeOff, ChevronDown, ChevronUp, CheckCircle2, Gift } from 'lucide-react';
 import Button from '../../components/common/Button';
 import Input from '../../components/common/Input';
 import CountrySelect from '../../components/common/CountrySelect';
@@ -9,6 +9,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { formatPhoneNumber, getCountryByCode } from '../../data/countries';
 
 const Register = () => {
+  const [searchParams] = useSearchParams();
+  const referralCodeFromUrl = searchParams.get('ref');
+  
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -18,6 +21,7 @@ const Register = () => {
     password: '',
     confirmPassword: '',
     termsAccepted: false,
+    referralCode: referralCodeFromUrl || '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -124,6 +128,7 @@ const Register = () => {
         country_code: formData.country,
         password: formData.password,
         confirm_password: formData.confirmPassword,
+        referral_code_input: formData.referralCode,
       };
       
       const result = await register(registrationData);
@@ -245,6 +250,16 @@ const Register = () => {
               error={errors.phone}
               required
             />
+
+            {formData.referralCode && (
+              <div className="p-4 bg-green-50 border-2 border-emerald rounded-xl flex items-center gap-3">
+                <Gift className="w-5 h-5 text-emerald flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-text-dark">Referral Code Applied</p>
+                  <p className="text-xs text-text-gray">You'll earn a bonus when you make your first deposit!</p>
+                </div>
+              </div>
+            )}
             
             <div>
               <div className="relative">

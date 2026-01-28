@@ -131,3 +131,81 @@ class FailedLoginAttempt(models.Model):
     def __str__(self):
         return f"{self.email_or_user_id} - {self.attempt_time} - {self.reason}"
 
+
+class DeviceTracking(models.Model):
+    """Track user devices for security"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='devices')
+    device_id = models.CharField(max_length=255, unique=True)  # Generated hash
+    device_name = models.CharField(max_length=255, blank=True)  # e.g., "Chrome on Windows"
+    device_type = models.CharField(max_length=50, choices=[
+        ('desktop', 'Desktop'),
+        ('mobile', 'Mobile'),
+        ('tablet', 'Tablet'),
+        ('unknown', 'Unknown'),
+    ], default='unknown')
+    user_agent = models.CharField(max_length=500, blank=True)
+    browser = models.CharField(max_length=100, blank=True)
+    os = models.CharField(max_length=100, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    last_used_ip = models.GenericIPAddressField(null=True, blank=True)
+    is_trusted = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    first_seen = models.DateTimeField(auto_now_add=True)
+    last_seen = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'device_tracking'
+        ordering = ['-last_seen']
+        indexes = [
+            models.Index(fields=['user', '-last_seen']),
+            models.Index(fields=['device_id']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.user_id} - {self.device_name or self.device_type}"
+
+
+class SecurityLog(models.Model):
+    """Log security events"""
+    EVENT_TYPES = [
+        ('password_changed', 'Password Changed'),
+        ('email_changed', 'Email Changed'),
+        ('phone_changed', 'Phone Changed'),
+        ('2fa_enabled', '2FA Enabled'),
+        ('2fa_disabled', '2FA Disabled'),
+        ('unusual_login', 'Unusual Login Activity'),
+        ('account_locked', 'Account Locked'),
+        ('account_unlocked', 'Account Unlocked'),
+        ('suspicious_activity', 'Suspicious Activity Detected'),
+        ('new_device', 'New Device Detected'),
+        ('device_removed', 'Device Removed'),
+        ('multiple_failed_logins', 'Multiple Failed Logins'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='security_logs')
+    event_type = models.CharField(max_length=50, choices=EVENT_TYPES)
+    description = models.TextField()
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.CharField(max_length=500, blank=True)
+    device = models.ForeignKey(DeviceTracking, on_delete=models.SET_NULL, null=True, blank=True, related_name='security_logs')
+    severity = models.CharField(max_length=20, choices=[
+        ('info', 'Info'),
+        ('warning', 'Warning'),
+        ('critical', 'Critical'),
+    ], default='info')
+    alert_sent = models.BooleanField(default=False)  # Email/SMS sent
+    alert_sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'security_logs'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['event_type', '-created_at']),
+            models.Index(fields=['severity', '-created_at']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.user_id} - {self.event_type} - {self.severity}"
+

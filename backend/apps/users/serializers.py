@@ -5,13 +5,14 @@ from .models import User
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     confirm_password = serializers.CharField(write_only=True, required=False)
+    referral_code_input = serializers.CharField(write_only=True, required=False, allow_blank=True)
     
     class Meta:
         model = User
         fields = (
             'first_name', 'last_name', 'email', 'phone', 
             'country_code', 'password', 'confirm_password',
-            'date_of_birth'
+            'date_of_birth', 'referral_code_input'
         )
         extra_kwargs = {
             'first_name': {'required': True},
@@ -46,8 +47,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         return attrs
     
     def create(self, validated_data):
-        # Remove confirm_password from validated_data
+        from apps.referrals.models import Referral
+        
+        # Remove confirm_password and referral_code_input from validated_data
         validated_data.pop('confirm_password', None)
+        referral_code_input = validated_data.pop('referral_code_input', None)
         
         # Extract password and hash it
         password = validated_data.pop('password')
@@ -61,28 +65,60 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         while User.objects.filter(referral_code=referral_code).exists():
             referral_code = User.generate_referral_code()
         
+        # Handle referred_by if referral code is provided
+        referred_by = None
+        if referral_code_input:
+            try:
+                referrer = User.objects.get(referral_code=referral_code_input)
+                referred_by = referrer.user_id
+            except User.DoesNotExist:
+                pass  # Invalid referral code, ignore
+        
         # Create user
         user = User.objects.create(
             user_id=user_id,
             referral_code=referral_code,
+            referred_by=referred_by,
             **validated_data
         )
         user.set_password(password)
         user.save()
         
+        # Create referral relationship if referred by someone
+        if referred_by:
+            try:
+                referrer_user = User.objects.get(user_id=referred_by)
+                Referral.objects.create(
+                    referrer=referrer_user,
+                    referee=user,
+                    referral_code_used=referral_code_input,
+                    tier_level=1,
+                    status='pending'
+                )
+            except User.DoesNotExist:
+                pass
+        
         return user
 
 
 class UserSerializer(serializers.ModelSerializer):
+    referral_link = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
         fields = (
             'user_id', 'email', 'phone', 'first_name', 'last_name',
             'country_code', 'account_status', 'kyc_status',
             'email_verified', 'phone_verified', 'created_at',
-            'otp_enabled'
+            'otp_enabled', 'referral_code', 'referral_link'
         )
-        read_only_fields = ('user_id', 'created_at')
+        read_only_fields = ('user_id', 'created_at', 'referral_code')
+    
+    def get_referral_link(self, obj):
+        request = self.context.get('request')
+        if request:
+            return f"{request.scheme}://{request.get_host()}/register?ref={obj.referral_code}"
+        return f"https://quantumcapital.com/register?ref={obj.referral_code}"
 
 
 class UserLoginSerializer(serializers.Serializer):
